@@ -1,8 +1,4 @@
 
-# coding: utf-8
-
-# In[ ]:
-
 import numpy as np
 
 def interpolate(M, y, x):
@@ -32,17 +28,8 @@ def advect(V, U, S, dt):
     x = np.tile(np.arange(n), (n,1))
     y = np.transpose(x)
 
-    x = x - dt*U/2
-    y = y - dt*V/2
-    U2 = np.zeros((n,n), dtype=np.float)
-    V2 = np.zeros((n,n), dtype=np.float)
-    for i in range(n):
-        for j in range(n):
-            U2.itemset((i,j), interpolate(U,y.item(i,j),x.item(i,j)))
-            V2.itemset((i,j), interpolate(V,y.item(i,j),x.item(i,j)))
-
-    x = x - dt*U2
-    y = y - dt*V2
+    x = x - dt*U
+    y = y - dt*V
 
     S2 = np.zeros((n,n))
 

@@ -1,6 +1,7 @@
-An attempt to write a fluid simulator in Python.
+A fluid simulator written in Python.
 
-I am following the method described in Stam's paper: Real-Time Fluid 
-Dynamics for Games.
+To run the simulator, run the [fluid\_sim.py](fluid\_sim.py) file. You need to have NumPy, SciPy, Matplotlib installed.
 
-For sample output, watch the files vector_field.gif and smoke.gif
+I followed the method described in Jos Stam's paper: [Real-Time Fluid Dynamics for Games](http://www.intpowertechcorp.com/GDC03.pdf).
+
+For sample output, watch the [sample animation](animation.mp4).

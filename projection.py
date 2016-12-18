@@ -1,6 +1,6 @@
 
 import numpy as np
-from scipy.sparse.linalg import cg
+from scipy.sparse.linalg import minres
 from vectormath import divergence
 
 def pressure_solve(V, U, M, x0):
@@ -20,7 +20,7 @@ def pressure_solve(V, U, M, x0):
 
     x0 = x0[1:n1, 1:n1].flatten()
 
-    x, _ = cg(M, W, x0, 0.4)
+    x, _ = minres(M, W, x0, 0.4)
     x = np.reshape(x,(n2,n2))
     X = np.zeros((n,n), dtype = np.float)
     X[1:n1, 1:n1] = x
