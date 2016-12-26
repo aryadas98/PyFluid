@@ -4,5 +4,4 @@ To run the simulator, run the [fluid\_sim.py](fluid\_sim.py) file. You need to h
 
 I followed the method described in Jos Stam's paper: [Real-Time Fluid Dynamics for Games](http://www.intpowertechcorp.com/GDC03.pdf).
 
-Sample output: (For better quality, watch [this](animation.mp4).)
-![Sample ouput gif](animation.gif)
+For better sample output, watch [this](animation.mp4).
