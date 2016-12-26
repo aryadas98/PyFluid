@@ -14,11 +14,11 @@ V = np.zeros((n,n), dtype=np.float)
 P = np.zeros((n,n), dtype=np.float)
 S = np.zeros((n,n), dtype=np.float)
 
-M = getLaplacianMatrix(n-2)
+L = getLaplacianMatrix(n-2)
 
 dt = 0.1
-smoke_dt = 5*dt
-eta =0.1
+sdt = 5*dt
+nu = 0.1
 
 fig = plt.figure()
 plt.axis('off')
@@ -26,6 +26,11 @@ plot = plt.imshow(S, cmap='gray', origin='lower', vmin=0, vmax=3, interpolation=
 
 def init_anim():
     global U,V,S,plot
+
+    U = np.zeros((n,n), dtype=np.float)
+    V = np.zeros((n,n), dtype=np.float)
+    P = np.zeros((n,n), dtype=np.float)
+    S = np.zeros((n,n), dtype=np.float)
 
     # At the moment, the initial conditions have to be set manually.
     # I have provided two sets of initial conditions. Use any one.
@@ -39,7 +44,7 @@ def init_anim():
     # S[n//2+4:n//2+7, n//2+4:n//2+7] = 10*np.ones((3,3), dtype=float)
 
     # Set 2:
-    
+
     U[n//2-10:n//2-7, n//2-1:n//2+2] = -10*np.ones((3,3), dtype=float)
     U[n//2+7:n//2+10, n//2-1:n//2+2] = 10*np.ones((3,3), dtype=float)
     V[n//2-1:n//2+2, n//2-10:n//2-7] = 10*np.ones((3,3), dtype=float)
@@ -56,24 +61,24 @@ def init_anim():
 def animate(i):
     global U,V,S,P,plot
 
-    S = diffuse(S, M, eta, dt)
-    U = diffuse(U, M, eta, dt)
-    V = diffuse(V, M, eta, dt)
+    S = diffuse(S, L, nu, dt)
+    U = diffuse(U, L, nu, dt)
+    V = diffuse(V, L, nu, dt)
 
-    V, U, P = pressure_solve(V, U, M, P)
+    V, U, P = pressure_solve(V, U, L, P)
 
     U = advect(V, U, U, dt)
     V = advect(V, U, V, dt)
-    S = advect(V, U, S, smoke_dt)
+    S = advect(V, U, S, sdt)
 
-    V, U, P = pressure_solve(V, U, M, P)
+    V, U, P = pressure_solve(V, U, L, P)
 
     plot.set_data(S)
     return [plot]
 
 anim = animation.FuncAnimation(fig, animate, init_func=init_anim, frames=70, interval=5, blit=True)
 
-# Save the animation. If you want to save the animation, uncomment the line below.
+# If you want to save the animation, uncomment the line below.
 # anim.save('animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 plt.show()
