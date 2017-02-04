@@ -1,40 +1,25 @@
-
 import numpy as np
-from scipy.sparse.linalg import minres
-from vectormath import divergence
+from vectormath import gradient,divergence
+from boundaries import set_bounds
 
-def pressure_solve(V, U, L, x0):
-    n,_ = U.shape
-    n1 = n-1
-    n2 = n-2
-    n3 = n-3
+def project(u,v,res,div,p,px,py,b,b2):
+    d1,d2 = u.shape
+    divergence(u,v,b,res,div)
+    # zero pressure to keep things stable
+    p.fill(0)
+    set_bounds(p,b)
 
-    #plot1 = plt.figure()
-    #plt.quiver(U, V)
-    #plt.title("Before Projection")
-    #plt.show(plot1)
+    # Gauss-Seidel solver
+    for _ in range(20):
+        for i in range(1,d1-1):
+            for j in range(1,d2-1):
+                if b[i,j]:
+                    p[i,j] = (p[i,j-1]+p[i,j+1]+p[i-1,j]+p[i+1,j]-div[i,j])/b2[i,j]
+        set_bounds(p,b)
 
-    W = divergence(V,U)
-    W = W[1:n1, 1:n1]
-    W = W.flatten()
 
-    x0 = x0[1:n1, 1:n1].flatten()
+    u -= gradient(p,False,res,b,px)
+    v -= gradient(p,True,res,b,py)
 
-    x, _ = minres(L, W, x0, 0.4)
-    x = np.reshape(x,(n2,n2))
-    X = np.zeros((n,n), dtype = np.float)
-    X[1:n1, 1:n1] = x
-    X[0, 1:n1] = x[0]
-    X[n1, 1:n1] = x[n3]
-    X[1:n1, 0] = x[:,0]
-    X[1:n1, n1] = x[:,n3]
-    X[0,0] = x[0,0]
-    X[0,n1] = x[0,n3]
-    X[n1,0] = x[n3,0]
-    X[n1,n1] = x[n3,n3]
-
-    U = U - np.gradient(X, axis=1)
-    V = V - np.gradient(X, axis=0)
-
-    return (V,U,X)
-
+    set_bounds(u,b)
+    set_bounds(v,b)

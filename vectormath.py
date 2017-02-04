@@ -1,30 +1,59 @@
-
 import numpy as np
-from scipy.sparse import diags
 
-def divergence(Y, X):
-    return np.add(np.gradient(Y, axis=0), np.gradient(X, axis=1))
+# calculates gradient, taking boundaries into account
+# uses central differences for points not surrounded by boundaries
+# uses left or right differences for other points
 
-def getLaplacianMatrix(n):
-    # generate [-2,-3,-2,-3,-4,-3,-2,-3,-2]
-    D = -4*np.ones((n,n), dtype=np.int)
-    D[0]=-3*np.ones((1,n), dtype=np.int)
-    D[n-1]=-3*np.ones((1,n), dtype=np.int)
-    D[:,0]=-3*np.ones(n, dtype=np.int)
-    D[:,n-1]=-3*np.ones(n, dtype=np.int)
-    D[0,0]=-2; D[0,n-1]=-2; D[n-1,0]=-2; D[n-1,n-1]=-2
-    D = D.flatten()
+def gradient(X, y_axis, res, b, out):
+    d1,d2 = X.shape
 
-    # generate [1,1,0,1,1,0,1,1]
-    D1 = np.ones((n,n), dtype=np.int)
-    D1[0] = np.zeros(n, dtype=np.int)
-    D1 = np.transpose(D1)
-    D1 = D1.flatten()[1:]
+    if y_axis:
+        for i in range(1,d1-1):
+            for j in range(1,d2-1):
+                if b[i,j]:
+                    if (b[i-1,j] and b[i+1,j]):
+                        out[i,j] = (X[i+1,j]-X[i-1,j])*res/2
+                    elif b[i-1,j]:
+                        out[i,j] = (X[i,j]-X[i-1,j])*res
+                    elif b[i+1,j]:
+                        out[i,j] = (X[i+1,j]-X[i,j])*res
+    else:
+        for i in range(1,d1-1):
+            for j in range(1,d2-1):
+                if b[i,j]:
+                    if (b[i,j-1] and b[i,j+1]):
+                        out[i,j] = (X[i,j+1]-X[i,j-1])*res/2
+                    elif b[i,j-1]:
+                        out[i,j] = (X[i,j]-X[i,j-1])*res
+                    elif b[i,j+1]:
+                        out[i,j] = (X[i,j+1]-X[i,j])*res
+    return out
 
-    # generate [1,1,1,1,1,1]
-    D2 = np.ones(n*(n-1), dtype=int)
 
-    # return matrix
-    diagonals = [D2, D1, D, D1, D2]
-    return diags(diagonals, [-n, -1, 0, 1, n])
+
+# calculates divergence, taking boundaries into account
+# uses central differences for points not surrounded by boundaries
+# uses left or right differences for other points
+
+def divergence(X, Y, b, res, out):
+    d1,d2 = X.shape
+    out.fill(0)
+
+    for i in range(1,d1-1):
+        for j in range(1,d2-1):
+            if b[i,j]:
+                if (b[i-1,j] and b[i+1,j]):
+                    out[i,j] += (Y[i+1,j]-Y[i-1,j])/2/res
+                elif b[i-1,j]:
+                    out[i,j] += (Y[i,j]-Y[i-1,j])/res
+                elif b[i+1,j]:
+                    out[i,j] += (Y[i+1,j]-Y[i,j])/res
+
+                if (b[i,j-1] and b[i,j+1]):
+                    out[i,j] += (X[i,j+1]-X[i,j-1])/2/res
+                elif b[i,j-1]:
+                    out[i,j] += (X[i,j]-X[i,j-1])/res
+                elif b[i,j+1]:
+                    out[i,j] += (X[i,j+1]-X[i,j])/res
+    return out
 
